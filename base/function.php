@@ -13,7 +13,7 @@ class X{
             $ip = getenv("REMOTE_ADDR");
         }
         
-        if(filter_var($ip,FILTER_VARLIDATE_IP)){
+        if(filter_var($ip,FILTER_VALIDATE_IP)){
             return $ip;
         }else{
             return "0.0.0.0";
