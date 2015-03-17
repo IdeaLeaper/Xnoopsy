@@ -14,7 +14,7 @@ class USER{
         }
         
         if(API::user_verify($_IS)){
-            echo '{"method":"get_cookie","status":"ok","cookie":"'.API::make_cookie($_IS).'"}';
+            echo '{"method":"get_cookie","status":"ok","cookie":"'.API::make_cookie($_IS).'","user_id":'.API::get_cookie_userid(API::make_cookie($_IS)).'}';
         }else{
             echo '{"method":"get_cookie","status":"error","error":"verify failed"}';
         }
@@ -32,7 +32,7 @@ class USER{
         }
         
         if(API::verify_cookie($_IS)){
-            echo '{"method":"verify_cookie","status":"ok"}';
+            echo '{"method":"verify_cookie","status":"ok","user_id":'.API::get_cookie_userid($_IS['cookie']).'}';
         }else{
             echo '{"method":"verify_cookie","status":"error","error":"verify failed"}';
         }
@@ -81,7 +81,7 @@ class USER{
                 
                 COIN::create_coin_column($link,MYSQL::lastID($link)); //积分插件
                     
-                echo '{"method":"register","status":"ok"}';
+                echo '{"method":"register","status":"ok","user_id":'.MYSQL::lastID($link).'}';
             }else{
                 echo '{"method":"register","status":"error","error":"user existed"}';
             }
@@ -118,5 +118,6 @@ class USER{
             echo '{"method":"get_user_meta","status":"error","error":"verify failed"}';
         }
     }
+    
 }
 ?>

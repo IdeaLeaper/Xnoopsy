@@ -449,5 +449,75 @@ class POST{
             echo '{"method":"edit_post","status":"error","error","verify failed"}';
         }
     }
+    
+    
+    /* 获得用户POST */
+    static function user_posts($_IS){
+        if(
+            !isset($_IS['page'])
+            ||!isset($_IS['user_id'])
+            ||X::emptyEx($_IS['page'])
+            ||X::emptyEx($_IS['user_id'])
+        ){
+            $page = 1;
+        }else{
+            $page = intval($_IS['page']);
+        }
+        
+        /* 页数处理 */
+        if($page == 0){$page = 1;}
+        
+        $pagesize = 10;
+        
+        $user_id = intval($_IS['user_id']);
+        
+        $link = MYSQL::connect();
+        MYSQL::selectDB($link,constant("mysql_db"));
+        $result = MYSQL::query($link,"select * from posts where user_id=$user_id");
+        $numrows = MYSQL::rows($result);
+
+        $pages = intval($numrows/$pagesize)+1;
+        
+        if($page>$pages){
+            MYSQL::close($link);
+            echo '{"method":"recent_posts","status":"error","error","pageover"}';
+            return 0;
+        }
+        
+        $offset = $pagesize*($page - 1);
+        
+        $result = MYSQL::query($link,"select * from posts where user_id=$user_id order by post_id desc limit $offset,$pagesize");
+        $i = 0;
+        
+        /* 组合数据 */
+        while($rows = MYSQL::fetch($result)){
+            $posts[$i] = array(
+                "post_id" => intval($rows['post_id']),
+                "title" => htmlspecialchars($rows['title']),
+                "excerpt" => X::br(htmlspecialchars(mb_substr($rows['content'],0,30,"utf-8")))."...",
+                "image" => $rows['image']
+            );
+            $i++;
+        }
+        
+        MYSQL::close($link);
+        
+        
+        /* 不存在项的处理 */
+        if(!isset($posts)){
+            $posts = array();
+        }
+        
+        /* 完成JSON输出 */
+        $json = array(
+            "method" => "user_posts",
+            "status" => "ok",
+            "count" => $numrows,
+            "pages" => $pages,
+            "pagenow" => $page,
+            "posts" => $posts
+        );
+        echo json_encode($json);
+    }
 }
 ?>

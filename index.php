@@ -67,6 +67,10 @@ if(isset($_REQUEST['api'])){
         
         POST::tag_posts($arguments);
         
+    }else if($api=="user_posts"){
+        
+        POST::user_posts($arguments);
+        
     }else if($api=="submit_comment"){
         
         COMMENT::submit_comment($arguments);
