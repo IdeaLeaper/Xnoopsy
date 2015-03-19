@@ -11,8 +11,9 @@ class PLUGIN{
             return 0;
         }
         
-        echo '{"method":"get_coin","status":"ok","coin":'.COIN::get_coin(API::get_cookie_userid($_IS['cookie'])).'}';
-        return;
+        $cookie = addslashes(trim($_IS['cookie']));
+        
+        echo '{"method":"get_coin","status":"ok","coin":'.COIN::get_coin(API::get_cookie_userid($cookie)).'}';
     }
 }
 ?>

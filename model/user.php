@@ -13,8 +13,11 @@ class USER{
             return;
         }
         
-        if(API::user_verify($_IS)){
-            echo '{"method":"get_cookie","status":"ok","cookie":"'.API::make_cookie($_IS).'","user_id":'.API::get_cookie_userid(API::make_cookie($_IS)).'}';
+        $username = addslashes(trim($_IS['username']));
+        $password = addslashes(trim($_IS['password']));
+        
+        if(API::user_verify($username, $password)){
+            echo '{"method":"get_cookie","status":"ok","cookie":"'.API::make_cookie($username, $password).'","user_id":'.API::get_username_id($username).'}';
         }else{
             echo '{"method":"get_cookie","status":"error","error":"verify failed"}';
         }
@@ -31,8 +34,10 @@ class USER{
             return;
         }
         
-        if(API::verify_cookie($_IS)){
-            echo '{"method":"verify_cookie","status":"ok","user_id":'.API::get_cookie_userid($_IS['cookie']).'}';
+        $cookie = addslashes(trim($_IS['cookie']));
+        
+        if(API::verify_cookie($cookie)){
+            echo '{"method":"verify_cookie","status":"ok","user_id":'.API::get_cookie_userid($cookie).'}';
         }else{
             echo '{"method":"verify_cookie","status":"error","error":"verify failed"}';
         }
@@ -53,43 +58,16 @@ class USER{
         
         $username = addslashes(trim($_IS['username']));
         $password = addslashes(trim($_IS['password']));
-        $ip = X::getIP();
         
-        $link = MYSQL::connect();
-        MYSQL::selectDB($link,constant("mysql_db"));
-        
-        /* 启用了一个IP只能注册4个账户的限制 */
-        if(MYSQL::exist($link,"SELECT * FROM users WHERE ip='$ip'")<=3){
-            /* 防止重名 */
-            if(!MYSQL::exist($link,"SELECT * FROM users WHERE username='$username'")){
-                /* 创建新用户 */
-                MYSQL::query(
-                    $link,
-                    "INSERT INTO users (username, password, ip) 
-                    VALUES ('$username','".X::salt($password)."','$ip')"
-                );
-                
-                /* 创建新用户的额外字段 */
-                
-                MYSQL::query(
-                    $link,
-                    "INSERT INTO users_meta (user_id, name, value) 
-                    VALUES (".MYSQL::lastID($link).",'level','0')"
-                );
-                
-                /* 装载插件 */
-                
-                COIN::create_coin_column($link,MYSQL::lastID($link)); //积分插件
-                    
-                echo '{"method":"register","status":"ok","user_id":'.MYSQL::lastID($link).'}';
-            }else{
-                echo '{"method":"register","status":"error","error":"user existed"}';
-            }
-        }else{
+        $result = API::register($username, $password);
+        if($result == -255){
             echo '{"method":"register","status":"error","error":"ip blocked"}';
+        }else if($result == -244){
+            echo '{"method":"register","status":"error","error":"user existed"}';
+        }else {
+            COIN::create_coin_column($result); //积分插件
+            echo '{"method":"register","status":"ok","user_id":'.$result.'}';
         }
-        
-        MYSQL::close($link);
     }
     
     /* 获取用户信息 */
@@ -105,14 +83,11 @@ class USER{
         }
         
         $key = addslashes(trim($_IS['key']));
+        $cookie = addslashes(trim($_IS['cookie']));
         
-        if(API::verify_cookie($_IS)){
-            $link = MYSQL::connect();
-            MYSQL::selectDB($link,constant("mysql_db"));
-            $user_id = API::get_cookie_userid($_IS['cookie']);
-            $query = MYSQL::query($link,"SELECT * FROM users_meta WHERE user_id=$user_id and name='$key'");
-			$result = MYSQL::fetch($query);
-            $value = $result['value'];
+        if(API::verify_cookie($cookie)){
+            $user_id = API::get_cookie_userid($cookie);
+            $value = API::get_user_meta($user_id, $key);
             echo '{"method":"get_user_meta","status":"ok","key":"'.$key.'","value":"'.$value.'"}';
         }else{
             echo '{"method":"get_user_meta","status":"error","error":"verify failed"}';

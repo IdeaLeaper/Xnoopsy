@@ -25,52 +25,74 @@ class POST{
         
         if(isset($_IS['tags'])&&!X::emptyEx($_IS['tags'])){
             $tags = explode(",",addslashes(trim($_IS['tags'])));
+        }else{
+            $tags = array();
         }
         
-        if(API::verify_cookie($_IS)){
-            $link = MYSQL::connect();
-            MYSQL::selectDB($link,constant("mysql_db"));
+        $cookie = addslashes(trim($_IS['cookie']));
+        
+        if(API::verify_cookie($cookie)){
             
-            $user_id = API::get_cookie_userid($_IS['cookie']);
-            
-            /* 创建新POST */
-            MYSQL::query(
-                $link,
-                "INSERT INTO posts (user_id, title, content, image) 
-                VALUES ($user_id,'$title','$content','$image')"
-            );
-            
-            $post_id=MYSQL::lastID($link);
-            
-            /* 创建内容备份 */
-            MYSQL::query(
-                $link,
-                "INSERT INTO backup (post_id, content, image) 
-                VALUES ($post_id,'$content','$image')"
-            );
-            
-            
-            /* 插入标签表 */
-            if(isset($_IS['tags'])&&!X::emptyEx($_IS['tags'])){
-                for($i=0;$i<=count($tags)-1;$i++){
-                    MYSQL::query(
-                        $link,
-                        "INSERT INTO tags (post_id, name) 
-                        VALUES ($post_id,'$tags[$i]')"
-                    );
-                }
-            }
-            
-            MYSQL::close($link);
+            $user_id = API::get_cookie_userid($cookie);
+            $post_id = API::create_post($user_id, $title, $content, $image, $tags);
             
             /* 载入插件 */
-            COIN::plus(API::get_cookie_userid($_IS['cookie']),"20"); //增加20积分
+            COIN::plus(API::get_cookie_userid($cookie),"20"); //增加20积分
             
             echo '{"method":"create_post","status":"ok","post_id":'.$post_id.'}';
         }else{
             echo '{"method":"create_post","status":"error","error","verify failed"}';
         }
     }
+    
+    
+    /* 编辑POST */
+    static function edit_post($_IS){
+        if(
+            !isset($_IS['post_id'])
+            ||!isset($_IS['content'])
+            ||!isset($_IS['cookie'])
+            ||X::emptyEx($_IS['post_id'])
+            ||X::emptyEx($_IS['content'])
+            ||X::emptyEx($_IS['cookie'])
+        ){
+            echo '{"method":"edit_post","status":"error","error","values undefined"}';
+            return 0;
+        }
+        
+        $post_id = intval($_IS['post_id']);
+        $content = addslashes($_IS['content']);
+        
+        if(isset($_IS['tags'])&&!X::emptyEx($_IS['tags'])){
+            $tags = explode(",",addslashes(trim($_IS['tags'])));
+        } else {
+            $tags = array();
+        }
+        
+        /* 选择性更新图片 */
+        if(isset($_IS['image'])&&!X::emptyEx($_IS['image'])){
+            $image = addslashes(trim($_IS['image']));
+        } else {
+            $image = null;
+        }
+        
+        $cookie = addslashes(trim($_IS['cookie']));
+        
+        if(API::verify_cookie($cookie)){
+            
+            $user_id = API::get_cookie_userid($cookie);
+            $result = API::edit_post($user_id, $post_id, $content, $image, $tags);
+            
+            if($result == -1){
+                echo '{"method":"edit_post","status":"error","error","not existed"}';
+            } else {
+                echo '{"method":"edit_post","status":"ok","post_id":'.$post_id.'}';
+            }
+        }else{
+            echo '{"method":"edit_post","status":"error","error","verify failed"}';
+        }
+    }
+    
     
     /* 获得单个POST */
     static function get_post($_IS){
@@ -127,7 +149,7 @@ class POST{
     }
     
     /* 获得最近posts */
-    static function recent_posts($_IS){
+    static function get_recent_posts($_IS){
         if(
             !isset($_IS['page'])
             ||X::emptyEx($_IS['page'])
@@ -192,7 +214,7 @@ class POST{
     }
     
     /* 搜索posts */
-    static function search_posts($_IS){
+    static function get_search_posts($_IS){
         if(
             !isset($_IS['search'])
             ||X::emptyEx($_IS['search'])
@@ -275,7 +297,7 @@ class POST{
     }
     
     /* 获得指定标签的posts */
-    static function tag_posts($_IS){
+    static function get_tag_posts($_IS){
         if(
             !isset($_IS['tag'])
             ||X::emptyEx($_IS['tag'])
@@ -359,100 +381,8 @@ class POST{
         echo json_encode($json);
     }
     
-    /* 编辑POST */
-    static function edit_post($_IS){
-        if(
-            !isset($_IS['post_id'])
-            ||!isset($_IS['content'])
-            ||!isset($_IS['cookie'])
-            ||X::emptyEx($_IS['post_id'])
-            ||X::emptyEx($_IS['content'])
-            ||X::emptyEx($_IS['cookie'])
-        ){
-            echo '{"method":"edit_post","status":"error","error","values undefined"}';
-            return 0;
-        }
-        
-        $post_id = intval($_IS['post_id']);
-        $content = addslashes($_IS['content']);
-        
-        if(isset($_IS['tags'])&&!X::emptyEx($_IS['tags'])){
-            $tags = explode(",",addslashes(trim($_IS['tags'])));
-        }
-        
-        if(API::verify_cookie($_IS)){
-            $link = MYSQL::connect();
-            MYSQL::selectDB($link,constant("mysql_db"));
-            
-
-            
-            /* 成功性判断 */
-            $result = MYSQL::assoc($link,"SELECT * FROM posts WHERE post_id=$post_id");
-            
-            if(!$result['post_id']){
-                MYSQL::close($link);
-                echo '{"method":"edit_post","status":"error","error","not existed"}';
-                return;
-            }else{
-                $image = $result['image'];
-            }
-            
-            $user_id = API::get_cookie_userid($_IS['cookie']);
-            $user_query = MYSQL::query($link,"SELECT * FROM users_meta WHERE user_id=$user_id and name='level'");
-            $result_new = MYSQL::fetch($user_query);
-            
-            if(intval($result_new['value'])<1&&$user_id!=$result['user_id']){
-                MYSQL::close($link);
-                echo '{"method":"edit_post","status":"error","error","level failed"}';
-                return;
-            }
-            
-            /* 更新POST */
-            MYSQL::query(
-                $link,
-                "UPDATE posts SET content='$content' WHERE post_id=$post_id"
-            );
-            
-            /* 选择性更新图片 */
-            if(isset($_IS['image'])&&!X::emptyEx($_IS['image'])){
-                $image = addslashes(trim($_IS['image']));
-                MYSQL::query(
-                    $link,
-                    "UPDATE posts SET image='$image' WHERE post_id=$post_id"
-                );
-            }
-
-            /* 创建内容备份 */
-            MYSQL::query(
-                $link,
-                "INSERT INTO backup (post_id, content, image) 
-                VALUES ($post_id,'$content','$image')"
-            );
-            
-            
-            /* 重置标签表 */
-            if(isset($_IS['tags'])&&!X::emptyEx($_IS['tags'])){
-                MYSQL::query($link,"DELETE FROM tags WHERE post_id=$post_id");
-                for($i=0;$i<=count($tags)-1;$i++){
-                    MYSQL::query(
-                        $link,
-                        "INSERT INTO tags (post_id, name) 
-                        VALUES ($post_id,'$tags[$i]')"
-                    );
-                }
-            }
-            
-            MYSQL::close($link);
-            
-            echo '{"method":"edit_post","status":"ok","post_id":'.$post_id.'}';
-        }else{
-            echo '{"method":"edit_post","status":"error","error","verify failed"}';
-        }
-    }
-    
-    
     /* 获得用户POST */
-    static function user_posts($_IS){
+    static function get_user_posts($_IS){
         if(
             !isset($_IS['page'])
             ||!isset($_IS['user_id'])

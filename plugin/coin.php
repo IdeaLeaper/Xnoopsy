@@ -1,12 +1,15 @@
 <?php
 class COIN{
     /* 创建COIN列 */
-    static function create_coin_column($link,$user_id){
+    static function create_coin_column($user_id){
+        $link = MYSQL::connect();
+        MYSQL::selectDB($link,constant("mysql_db"));
         MYSQL::query(
             $link,
             "INSERT INTO users_meta (user_id, name, value) 
             VALUES (".$user_id.",'coin','100')"
         );
+        MYSQL::close($link);
     }
     
     /* 获得COIN值(内部API) */

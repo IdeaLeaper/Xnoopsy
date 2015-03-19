@@ -18,29 +18,18 @@ class COMMENT{
         $post_id = intval($_IS['post_id']);
         $content = addslashes($_IS['content']);
         
-        if(API::verify_cookie($_IS)){
-            $link = MYSQL::connect();
-            MYSQL::selectDB($link,constant("mysql_db"));
+        $cookie = addslashes(trim($_IS['cookie']));
+        
+        if(API::verify_cookie($cookie)){
             
-            $user_id = API::get_cookie_userid($_IS['cookie']);
-            
-            if(MYSQL::exist($link,"SELECT * FROM posts WHERE post_id=$post_id")){
-                /* 创建新POST */
-                MYSQL::query(
-                    $link,
-                    "INSERT INTO comments (user_id, post_id, content) 
-                    VALUES ($user_id, $post_id, '$content')"
-                );
-                echo '{"method":"submit_comment","status":"ok","post_id":'.$post_id.'}';
-            }else{
+            $user_id = API::get_cookie_userid($cookie);
+            $result = API::submit_comment($user_id, $post_id, $content);
+            if($result == -1){
                 echo '{"method":"submit_comment","status":"error","error","not existed"}';
+            } else {
+                COIN::plus(API::get_cookie_userid($_IS['cookie']),"5"); //增加5积分
+                echo '{"method":"submit_comment","status":"ok","post_id":'.$result.'}';
             }
-            
-            MYSQL::close($link);
-            
-            /* 载入插件 */
-            COIN::plus(API::get_cookie_userid($_IS['cookie']),"5"); //增加5积分
-            
             
         }else{
             echo '{"method":"submit_comment","status":"error","error","verify failed"}';

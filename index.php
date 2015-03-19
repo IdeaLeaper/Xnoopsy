@@ -9,6 +9,7 @@
 require("base/config.php");
 require("base/mysql.php");
 require("base/function.php");
+require("base/api.php");
 
 /* 引用插件 */
 require("plugin/coin.php");
@@ -55,21 +56,21 @@ if(isset($_REQUEST['api'])){
         
         POST::get_post($arguments);
         
-    }else if($api=="recent_posts"){
+    }else if($api=="get_recent_posts"){
         
-        POST::recent_posts($arguments);
+        POST::get_recent_posts($arguments);
         
-    }else if($api=="search_posts"){
+    }else if($api=="get_search_posts"){
         
-        POST::search_posts($arguments);
+        POST::get_search_posts($arguments);
         
-    }else if($api=="tag_posts"){
+    }else if($api=="get_tag_posts"){
         
-        POST::tag_posts($arguments);
+        POST::get_tag_posts($arguments);
         
-    }else if($api=="user_posts"){
+    }else if($api=="get_user_posts"){
         
-        POST::user_posts($arguments);
+        POST::get_user_posts($arguments);
         
     }else if($api=="submit_comment"){
         
