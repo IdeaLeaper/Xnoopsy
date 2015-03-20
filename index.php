@@ -18,6 +18,7 @@ require("plugin/coin.php");
 require("model/user.php");
 require("model/post.php");
 require("model/comment.php");
+require("model/cloud.php");
 require("model/plugin.php");
 
 /* 主接口 */
@@ -79,6 +80,10 @@ if(isset($_REQUEST['api'])){
     }else if($api=="get_comment"){
         
         COMMENT::get_comment($arguments);
+        
+    }else if($api=="upload_image"){
+        
+        CLOUD::upload_image($arguments);
         
     }else if($api=="get_coin"){
         

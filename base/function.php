@@ -20,14 +20,14 @@ class X{
         }
     }
     
-    /* URL安全的Base64编码 */
+    /* 特制的Base64编码 */
     static function encode($string){
         $data = base64_encode($string);
         $data = str_replace(array('+','/','='),array('-','_',''),$data);
         return $data;
     }
     
-    /* URL安全的Base64解码 */
+    /* 特制的Base64解码 */
     static function decode($string){
         $data = str_replace(array('-','_'),array('+','/'),$string);
         $mod4 = strlen($data) % 4;
@@ -52,5 +52,43 @@ class X{
         return $ret;
     }
     
+    static function urlsafe_base64_encode($string) {
+        $data = base64_encode($string);
+        $data = str_replace(array('+','/'),array('-','_'),$data);
+        return $data;
+    }
+    
+    static function hmac_sha1($str, $key)
+    {
+        $signature = "";
+        if (function_exists('hash_hmac'))
+        {
+            $signature = hash_hmac("sha1", $str, $key, true);
+        }
+        else
+        {
+            $blocksize	= 64;
+            $hashfunc	= 'sha1';
+            if (strlen($key) > $blocksize)
+            {
+                $key = pack('H*', $hashfunc($key));
+            }
+            $key	= str_pad($key,$blocksize,chr(0x00));
+            $ipad	= str_repeat(chr(0x36),$blocksize);
+            $opad	= str_repeat(chr(0x5c),$blocksize);
+            $hmac 	= pack(
+                'H*',$hashfunc(
+                    ($key^$opad).pack(
+                        'H*',$hashfunc(
+                            ($key^$ipad).$str
+                        )
+                    )
+                )
+            );
+            $signature = $hmac;
+        }
+        
+        return $signature;
+    }
 }
 ?>

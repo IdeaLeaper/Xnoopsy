@@ -250,5 +250,24 @@ class API{
         MYSQL::close($link);
         return $post_id;
     }
+    
+    /* 获取上传凭证 */
+    static function get_upload_token(){
+        $bucket = 'udia';
+        $AccessKey = 'nOt76L7fmswbaMYfdtxvkGj4licWzqDq2cFYogG7';
+        $SecretKey = 'sqxbYsPYxv5f1KcTMvDPsKkiMxGWIat0MLo5gMZp';
+        $deadline = time()+172800;
+        $policy_json = array(
+            "scope" => $bucket,
+            "deadline" => intval($deadline),
+            "returnBody" => '{"method":"upload_image","status":"ok","key":$(key),"url":"http://7xi6fz.com1.z0.glb.clouddn.com/"}'
+        );
+        $putPolicy = json_encode($policy_json);
+        $encodedPutPolicy = X::urlsafe_base64_encode($putPolicy);
+        $sign = X::hmac_sha1($encodedPutPolicy, $SecretKey);
+        $encodedSign = X::urlsafe_base64_encode($sign);
+        $uploadToken = $AccessKey.':'.$encodedSign.':'.$encodedPutPolicy;
+        return $uploadToken;
+    }
 }
 ?>
