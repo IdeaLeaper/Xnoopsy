@@ -66,7 +66,7 @@ class USER{
             echo '{"method":"register","status":"error","error":"user existed"}';
         }else {
             COIN::create_coin_column($result); //积分插件
-            echo '{"method":"register","status":"ok","user_id":'.$result.'}';
+            echo '{"method":"register","status":"ok","cookie":"'.API::make_cookie($username, $password).'","user_id":'.$result.'}';
         }
     }
     
