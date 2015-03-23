@@ -108,16 +108,17 @@ class API{
                     "INSERT INTO users (username, password, ip) 
                     VALUES ('$username','".X::salt($password)."','$ip')"
                 );
+				
+				$user_id = MYSQL::lastID($link);
                 
                 /* 创建新用户的额外字段 */
                 
                 MYSQL::query(
                     $link,
                     "INSERT INTO users_meta (user_id, name, value) 
-                    VALUES (".MYSQL::lastID($link).",'level','0')"
+                    VALUES (".$user_id.",'level','0')"
                 );
                 
-                $user_id = MYSQL::lastID($link);
                 $return = $user_id;
             }else{
                 $return = -244; //重复
