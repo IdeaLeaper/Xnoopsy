@@ -7,7 +7,7 @@ class PLUGIN{
             !isset($_IS['cookie'])
             ||X::emptyEx($_IS['cookie'])
         ){
-            echo '{"method":"get_coin","status":"error","error","cookie undefined"}';
+            echo '{"method":"get_coin","status":"error","error":"cookie undefined"}';
             return 0;
         }
         

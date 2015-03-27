@@ -9,7 +9,7 @@ class USER{
             ||X::emptyEx($_IS['username'])
             ||X::emptyEx($_IS['password'])
         ){
-            echo '{"method":"get_cookie","status":"error","error","values undefined"}';
+            echo '{"method":"get_cookie","status":"error","error":"values undefined"}';
             return;
         }
         
@@ -30,7 +30,7 @@ class USER{
             !isset($_IS['cookie'])
             ||X::emptyEx($_IS['cookie'])
         ){
-            echo '{"method":"verify_cookie","status":"error","error","cookie undefined"}';
+            echo '{"method":"verify_cookie","status":"error","error":"cookie undefined"}';
             return;
         }
         
@@ -52,7 +52,7 @@ class USER{
             ||X::emptyEx($_IS['username'])
             ||X::emptyEx($_IS['password'])
         ){
-            echo '{"method":"register","status":"error","error","values undefined"}';
+            echo '{"method":"register","status":"error","error":"values undefined"}';
             return;
         }
         
@@ -78,7 +78,7 @@ class USER{
             ||X::emptyEx($_IS['cookie'])
             ||X::emptyEx($_IS['key'])
         ){
-            echo '{"method":"get_user_meta","status":"error","error","values undefined"}';
+            echo '{"method":"get_user_meta","status":"error","error":"values undefined"}';
             return;
         }
         

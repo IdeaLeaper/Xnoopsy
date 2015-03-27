@@ -11,7 +11,7 @@ class POST{
             ||X::emptyEx($_IS['content'])
             ||X::emptyEx($_IS['cookie'])
         ){
-            echo '{"method":"create_post","status":"error","error","values undefined"}';
+            echo '{"method":"create_post","status":"error","error":"values undefined"}';
             return 0;
         }
         
@@ -41,7 +41,7 @@ class POST{
             
             echo '{"method":"create_post","status":"ok","post_id":'.$post_id.'}';
         }else{
-            echo '{"method":"create_post","status":"error","error","verify failed"}';
+            echo '{"method":"create_post","status":"error","error":"verify failed"}';
         }
     }
     
@@ -56,7 +56,7 @@ class POST{
             ||X::emptyEx($_IS['content'])
             ||X::emptyEx($_IS['cookie'])
         ){
-            echo '{"method":"edit_post","status":"error","error","values undefined"}';
+            echo '{"method":"edit_post","status":"error","error":"values undefined"}';
             return 0;
         }
         
@@ -84,12 +84,12 @@ class POST{
             $result = API::edit_post($user_id, $post_id, $content, $image, $tags);
             
             if($result == -1){
-                echo '{"method":"edit_post","status":"error","error","not existed"}';
+                echo '{"method":"edit_post","status":"error","error":"not existed"}';
             } else {
                 echo '{"method":"edit_post","status":"ok","post_id":'.$post_id.'}';
             }
         }else{
-            echo '{"method":"edit_post","status":"error","error","verify failed"}';
+            echo '{"method":"edit_post","status":"error","error":"verify failed"}';
         }
     }
     
@@ -100,7 +100,7 @@ class POST{
             !isset($_IS['post_id'])
             ||X::emptyEx($_IS['post_id'])
         ){
-            echo '{"method":"get_post","status":"error","error","post_id undefined"}';
+            echo '{"method":"get_post","status":"error","error":"post_id undefined"}';
             return 0;
         }
         
@@ -115,7 +115,7 @@ class POST{
         /* 判断POST是否存在 */
         if(!isset($result['post_id'])){
             MYSQL::close($link);
-            echo '{"method":"get_post","status":"error","error","not existed"}';
+            echo '{"method":"get_post","status":"error","error":"not existed"}';
             return;
         }
         
@@ -126,6 +126,8 @@ class POST{
             $tags[$i] = htmlspecialchars($rows['name']);
             $i++;
         }
+        
+        $comment_num = MYSQL::rows(MYSQL::query($link,"select * from comments where post_id=$post_id"));
         
         MYSQL::close($link);
         
@@ -140,6 +142,7 @@ class POST{
             "status" => "ok",
             "post_id" => $post_id,
             "author" => API::get_id_username(intval($result['user_id'])),
+            "comment_count" => $comment_num,
             "title" => htmlspecialchars($result['title']),
             "content" => X::br(htmlspecialchars($result['content'])),
             "image" => $result['image'],
@@ -173,7 +176,7 @@ class POST{
         
         if($page>$pages){
             MYSQL::close($link);
-            echo '{"method":"recent_posts","status":"error","error","pageover"}';
+            echo '{"method":"get_recent_posts","status":"error","error":"pageover"}';
             return 0;
         }
         
@@ -187,7 +190,7 @@ class POST{
             $posts[$i] = array(
                 "post_id" => intval($rows['post_id']),
                 "title" => htmlspecialchars($rows['title']),
-                "excerpt" => X::br(htmlspecialchars(mb_substr($rows['content'],0,30,"utf-8")))."...",
+                "excerpt" => X::dn(htmlspecialchars(X::left($rows['content'],28)))."...",
                 "image" => $rows['image']
             );
             $i++;
@@ -203,7 +206,7 @@ class POST{
         
         /* 完成JSON输出 */
         $json = array(
-            "method" => "recent_posts",
+            "method" => "get_recent_posts",
             "status" => "ok",
             "count" => $numrows,
             "pages" => $pages,
@@ -219,7 +222,7 @@ class POST{
             !isset($_IS['search'])
             ||X::emptyEx($_IS['search'])
         ){
-            echo '{"method":"create_post","status":"error","error","search undefined"}';
+            echo '{"method":"create_post","status":"error","error":"search undefined"}';
             return 0;
         }
         
@@ -256,7 +259,7 @@ class POST{
         
         if($page>$pages){
             MYSQL::close($link);
-            echo '{"method":"search_posts","status":"error","error","pageover"}';
+            echo '{"method":"get_search_posts","status":"error","error":"pageover"}';
             return 0;
         }
         
@@ -271,7 +274,7 @@ class POST{
             $posts[$i] = array(
                 "post_id" => intval($rows['post_id']),
                 "title" => htmlspecialchars($rows['title']),
-                "excerpt" => X::br(htmlspecialchars(mb_substr($rows['content'],0,30,"utf-8")))."...",
+                "excerpt" => X::dn(htmlspecialchars(X::left($rows['content'],28)))."...",
                 "image" => $rows['image']
             );
             $i++;
@@ -286,7 +289,7 @@ class POST{
         
         /* 完成JSON输出 */
         $json = array(
-            "method" => "recent_posts",
+            "method" => "get_recent_posts",
             "status" => "ok",
             "count" => $numrows,
             "pages" => $pages,
@@ -302,7 +305,7 @@ class POST{
             !isset($_IS['tag'])
             ||X::emptyEx($_IS['tag'])
         ){
-            echo '{"method":"tag_post","status":"error","error","tag undefined"}';
+            echo '{"method":"tag_post","status":"error","error":"tag undefined"}';
             return 0;
         }
         
@@ -339,7 +342,7 @@ class POST{
         
         if($page>$pages){
             MYSQL::close($link);
-            echo '{"method":"tag_posts","status":"error","error","pageover"}';
+            echo '{"method":"get_tag_posts","status":"error","error":"pageover"}';
             return 0;
         }
         
@@ -356,7 +359,7 @@ class POST{
             $posts[$i] = array(
                 "post_id" => intval($post['post_id']),
                 "title" => htmlspecialchars($post['title']),
-                "excerpt" => X::br(htmlspecialchars(mb_substr($post['content'],0,30,"utf-8")))."...",
+                "excerpt" => X::dn(htmlspecialchars(X::left($rows['content'],28)))."...",
                 "image" => $post['image']
             );
             $i++;
@@ -371,7 +374,7 @@ class POST{
         
         /* 完成JSON输出 */
         $json = array(
-            "method" => "recent_posts",
+            "method" => "get_recent_posts",
             "status" => "ok",
             "count" => $numrows,
             "pages" => $pages,
@@ -410,7 +413,7 @@ class POST{
         
         if($page>$pages){
             MYSQL::close($link);
-            echo '{"method":"recent_posts","status":"error","error","pageover"}';
+            echo '{"method":"get_recent_posts","status":"error","error":"pageover"}';
             return 0;
         }
         
@@ -424,7 +427,7 @@ class POST{
             $posts[$i] = array(
                 "post_id" => intval($rows['post_id']),
                 "title" => htmlspecialchars($rows['title']),
-                "excerpt" => X::br(htmlspecialchars(mb_substr($rows['content'],0,30,"utf-8")))."...",
+                "excerpt" => X::dn(htmlspecialchars(X::left($rows['content'],28)))."...",
                 "image" => $rows['image']
             );
             $i++;
@@ -440,7 +443,7 @@ class POST{
         
         /* 完成JSON输出 */
         $json = array(
-            "method" => "user_posts",
+            "method" => "get_user_posts",
             "status" => "ok",
             "count" => $numrows,
             "pages" => $pages,

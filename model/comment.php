@@ -11,7 +11,7 @@ class COMMENT{
             ||X::emptyEx($_IS['cookie'])
             ||X::emptyEx($_IS['content'])
         ){
-            echo '{"method":"submit_comment","status":"error","error","values undefined"}';
+            echo '{"method":"submit_comment","status":"error","error":"values undefined"}';
             return 0;
         }
         
@@ -25,14 +25,14 @@ class COMMENT{
             $user_id = API::get_cookie_userid($cookie);
             $result = API::submit_comment($user_id, $post_id, $content);
             if($result == -1){
-                echo '{"method":"submit_comment","status":"error","error","not existed"}';
+                echo '{"method":"submit_comment","status":"error","error":"not existed"}';
             } else {
                 COIN::plus(API::get_cookie_userid($_IS['cookie']),"5"); //增加5积分
                 echo '{"method":"submit_comment","status":"ok","post_id":'.$result.'}';
             }
             
         }else{
-            echo '{"method":"submit_comment","status":"error","error","verify failed"}';
+            echo '{"method":"submit_comment","status":"error","error":"verify failed"}';
         }
     }
     
@@ -42,7 +42,7 @@ class COMMENT{
             !isset($_IS['post_id'])
             ||X::emptyEx($_IS['post_id'])
         ){
-            echo '{"method":"get_comment","status":"error","error","post_id undefined"}';
+            echo '{"method":"get_comment","status":"error","error":"post_id undefined"}';
             return 0;
         }
         
@@ -54,7 +54,7 @@ class COMMENT{
         /* 检测POST是否存在 */
         if(!MYSQL::exist($link,"SELECT * FROM posts WHERE post_id=$post_id")){
             MYSQL::close($link);
-            echo '{"method":"get_comment","status":"error","error","not existed"}';
+            echo '{"method":"get_comment","status":"error","error":"not existed"}';
             return;
         }
         

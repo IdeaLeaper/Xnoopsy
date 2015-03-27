@@ -5,7 +5,7 @@ class CLOUD{
             !isset($_IS['base'])
             ||X::emptyEx($_IS['base'])
         ){
-            echo '{"method":"get_coin","status":"error","error","base64 undefined"}';
+            echo '{"method":"get_coin","status":"error","error":"base64 undefined"}';
             return 0;
         }
         
@@ -24,11 +24,11 @@ class CLOUD{
             return;
         }
         
-        $path = new CURLFile(realpath($file)); //要上传的文件  
+        $path = "@".realpath($file); //要上传的文件  
         $fields = array(
             "file" => $path,
             "token" => API::get_upload_token()
-        );  
+        );
         
         $ch = curl_init();
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);

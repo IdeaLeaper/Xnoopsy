@@ -50,9 +50,46 @@ class X{
         }
     }
     
+	
+	function left($string,$length)  
+    { 
+         $chars = $string;
+		 $start = 0;
+		 
+		 if($length>=strlen($string)){
+			return $string;
+		 }
+         $i=0;
+		 $k=0;
+		 $n=0;
+		 $m=0;
+		 $l=0;
+         do{
+           if(!isset($chars[$i])){
+           		break;
+           }
+            if (preg_match ("/[0-9a-zA-Z]/", $chars[$i])){//纯英文  
+                $m++;  
+            }  
+        else {$n++;     }//非英文字节,  
+            $k = $n/3+$m/2;  
+            $l = $n/3+$m;//最终截取长度；$l = $n/3+$m*2？  
+            $i++;  
+        } while($k < $length);  
+         $str1 = mb_substr($string,$start,$l,'utf-8');//保证不会出现乱码  
+         return $str1;  
+    }
+	
+	
     static function br($string){
         $ret = str_replace("\r\n","<br/>",$string);
         $ret = str_replace("\n","<br/>",$ret);
+        return $ret;
+    }
+    
+    static function dn($string){
+        $ret = str_replace("\r\n"," ",$string);
+        $ret = str_replace("\n"," ",$ret);
         return $ret;
     }
     

@@ -37,7 +37,7 @@ class COIN{
         
         MYSQL::query(
             $link,
-            "UPDATE users_meta SET value=$calc_result WHERE user_id=$user_id"
+            "UPDATE users_meta SET value=$calc_result WHERE user_id=$user_id and name='coin'"
         );
         
         MYSQL::close($link);
