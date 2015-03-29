@@ -289,7 +289,7 @@ class POST{
         
         /* 完成JSON输出 */
         $json = array(
-            "method" => "get_recent_posts",
+            "method" => "get_search_posts",
             "status" => "ok",
             "count" => $numrows,
             "pages" => $pages,
@@ -359,7 +359,7 @@ class POST{
             $posts[$i] = array(
                 "post_id" => intval($post['post_id']),
                 "title" => htmlspecialchars($post['title']),
-                "excerpt" => X::dn(htmlspecialchars(X::left($rows['content'],28)))."...",
+                "excerpt" => X::dn(htmlspecialchars(X::left($post['content'],28)))."...",
                 "image" => $post['image']
             );
             $i++;
@@ -374,7 +374,7 @@ class POST{
         
         /* 完成JSON输出 */
         $json = array(
-            "method" => "get_recent_posts",
+            "method" => "get_tag_posts",
             "status" => "ok",
             "count" => $numrows,
             "pages" => $pages,
