@@ -23,6 +23,19 @@ class PROPOSE{
         return $return;
     }
     
+    static function status($user_id, $pp_id){
+        $link = MYSQL::connect();
+        MYSQL::selectDB($link,constant("mysql_db"));
+        if(MYSQL::exist($link,"SELECT * FROM sign WHERE pp_id=$pp_id and user_id=$user_id")){
+            $return = true;
+        } else {
+            $return = false;
+        }
+        
+        MYSQL::close($link);
+        return $return;
+    }
+    
     static function create($user_id, $post_id, $title, $content){
         $link = MYSQL::connect();
         MYSQL::selectDB($link,constant("mysql_db"));

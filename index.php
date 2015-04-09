@@ -107,6 +107,10 @@ if(isset($_REQUEST['api'])){
         
         PP::get_sign_num($arguments);
         
+    }else if($api=="get_sign_status"){
+        
+        PP::get_sign_status($arguments);
+        
     }else if($api=="get_coin"){
         
         PLUGIN::get_coin($arguments);

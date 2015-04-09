@@ -8,7 +8,7 @@ class PP{
             ||X::emptyEx($_IS['cookie'])
         ){
             echo '{"method":"sign_propose","status":"error","error":"values undefined"}';
-            return 0;
+            return;
         }
         
         $pp_id = intval($_IS['pp_id']);
@@ -20,11 +20,15 @@ class PP{
             $user_id = API::get_cookie_userid($cookie);
             $name = API::get_cookie_username($cookie);
             $result = PROPOSE::sign($user_id, $pp_id, $name);
+            
+            
             if($result == -1){
                 echo '{"method":"sign_propose","status":"error","error":"not existed"}';
             } else if($result == -244){
                 echo '{"method":"sign_propose","status":"error","error":"existed"}';
             } else {
+                /* 载入插件 */
+                COIN::plus(API::get_cookie_userid($cookie), "5"); //增加积分
                 echo '{"method":"sign_propose","status":"ok","pp_id":'.$result.'}';
             }
             
@@ -62,7 +66,7 @@ class PP{
                 echo '{"method":"create_propose","status":"error","error":"not existed"}';
             }else{
                 /* 载入插件 */
-                COIN::plus(API::get_cookie_userid($cookie), "10"); //增加20积分
+                COIN::plus(API::get_cookie_userid($cookie), "10"); //增加积分
                 echo '{"method":"create_propose","status":"ok","pp_id":'.$pp_id.'}';
             }
         }else{
@@ -109,7 +113,7 @@ class PP{
         echo json_encode($json);
     }
     
-    /* 获得最近posts */
+    /* 获得最近proposes */
     static function get_recent_proposes($_IS){
         if(
             !isset($_IS['page'])
@@ -194,9 +198,28 @@ class PP{
 		echo '{"method":"get_sign_num","status":"ok","num":'.intval($sign_num).'}';
 		
         MYSQL::close($link);
+    }
+    
+    static function get_sign_status($_IS){
+        if(
+            !isset($_IS['pp_id'])
+            ||!isset($_IS['cookie'])
+            ||X::emptyEx($_IS['pp_id'])
+            ||X::emptyEx($_IS['cookie'])
+        ){
+            echo '{"method":"get_sign_status","status":"error","error":"values undefined"}';
+            return;
+        }
         
+        $pp_id = intval($_IS['pp_id']);
+        $cookie = addslashes(trim($_IS['cookie']));
+        $user_id = API::get_cookie_userid($cookie);
         
-        
+        if(PROPOSE::status($user_id, $pp_id) == true){
+            echo '{"method":"get_sign_status","status":"ok","existed":true}';
+        } else {
+            echo '{"method":"get_sign_status","status":"ok","existed":false}';
+        }
     }
 }
 ?>
