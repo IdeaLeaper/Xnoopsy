@@ -1,8 +1,8 @@
 <?php
 /*
     Xnoopsy PHP
-    一个简易的App后端系统
-    版本 Alpha 0315
+    可扩展的App后端系统
+    版本 Alpha 1.0.4
 */
 
 /* 引用必要文件 */
@@ -11,8 +11,9 @@ require("base/mysql.php");
 require("base/function.php");
 require("base/api.php");
 
-/* 引用插件 */
+/* 引用插件函数库 */
 require("plugin/coin.php");
+require("plugin/propose.php");
 
 /* 引用模型文件 */
 require("model/user.php");
@@ -20,6 +21,7 @@ require("model/post.php");
 require("model/comment.php");
 require("model/cloud.php");
 require("model/plugin.php");
+require("model/propose.php");
 
 /* 主接口 */
 if(isset($_REQUEST['api'])){
@@ -85,6 +87,26 @@ if(isset($_REQUEST['api'])){
         
         CLOUD::upload_image($arguments);
         
+    }else if($api=="get_propose"){
+        
+        PP::get_propose($arguments);
+        
+    }else if($api=="get_recent_proposes"){
+        
+        PP::get_recent_proposes($arguments);
+        
+    }else if($api=="create_propose"){
+        
+        PP::create_propose($arguments);
+        
+    }else if($api=="sign_propose"){
+        
+        PP::sign_propose($arguments);
+        
+    }else if($api=="get_sign_num"){
+        
+        PP::get_sign_num($arguments);
+        
     }else if($api=="get_coin"){
         
         PLUGIN::get_coin($arguments);
@@ -93,6 +115,6 @@ if(isset($_REQUEST['api'])){
         echo '{"method":"API","status":"error","error","Cannot find this API"}';
     }
 } else {
-    echo '{"license":"iDea Leaper Technology","version":"alpha 0315"}';
+    echo '{"license":"iDea Leaper Technology","version":"Alpha 1.0.4"}';
 }
 ?>

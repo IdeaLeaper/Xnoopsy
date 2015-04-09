@@ -93,38 +93,31 @@ class API{
     
     /* 创建用户 */
     static function register($username, $password){
-        $ip = X::getIP();
-        
         $link = MYSQL::connect();
         MYSQL::selectDB($link,constant("mysql_db"));
         
-        /* 启用了一个IP只能注册4个账户的限制 */
-        if(MYSQL::exist($link,"SELECT * FROM users WHERE ip='$ip'")<=3){
-            /* 防止重名 */
-            if(!MYSQL::exist($link,"SELECT * FROM users WHERE username='$username'")){
-                /* 创建新用户 */
-                MYSQL::query(
-                    $link,
-                    "INSERT INTO users (username, password, ip) 
-                    VALUES ('$username','".X::salt($password)."','$ip')"
-                );
-				
-				$user_id = MYSQL::lastID($link);
-                
-                /* 创建新用户的额外字段 */
-                
-                MYSQL::query(
-                    $link,
-                    "INSERT INTO users_meta (user_id, name, value) 
-                    VALUES (".$user_id.",'level','0')"
-                );
-                
-                $return = $user_id;
-            }else{
-                $return = -244; //重复
-            }
+        /* 防止重名 */
+        if(!MYSQL::exist($link,"SELECT * FROM users WHERE username='$username'")){
+            /* 创建新用户 */
+            MYSQL::query(
+                $link,
+                "INSERT INTO users (username, password) 
+                VALUES ('$username','".X::salt($password)."')"
+            );
+		
+			$user_id = MYSQL::lastID($link);
+            
+            /* 创建新用户的额外字段 */
+            
+            MYSQL::query(
+                $link,
+                "INSERT INTO users_meta (user_id, name, value) 
+                VALUES (".$user_id.",'level','0')"
+            );
+            
+            $return = $user_id;
         }else{
-            $return = -255;//Blocked
+            $return = -244; //重复
         }
         
         MYSQL::close($link);

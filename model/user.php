@@ -60,9 +60,7 @@ class USER{
         $password = addslashes(trim($_IS['password']));
         
         $result = API::register($username, $password);
-        if($result == -255){
-            echo '{"method":"register","status":"error","error":"ip blocked"}';
-        }else if($result == -244){
+        if($result == -244){
             echo '{"method":"register","status":"error","error":"user existed"}';
         }else {
             COIN::create_coin_column($result); //积分插件

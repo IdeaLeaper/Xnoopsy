@@ -24,7 +24,7 @@ class POST{
         }
         
         if(isset($_IS['tags'])&&!X::emptyEx($_IS['tags'])){
-            $tags = explode(",",addslashes(trim($_IS['tags'])));
+            $tags = explode(",",addslashes(str_replace(" ","",$_IS['tags'])));
         }else{
             $tags = array();
         }
@@ -64,8 +64,8 @@ class POST{
         $content = addslashes($_IS['content']);
         
         if(isset($_IS['tags'])&&!X::emptyEx($_IS['tags'])){
-            $tags = explode(",",addslashes(trim($_IS['tags'])));
-        } else {
+            $tags = explode(",",addslashes(str_replace(" ","",$_IS['tags'])));
+        }else{
             $tags = array();
         }
         
@@ -141,6 +141,7 @@ class POST{
             "method" => "get_posts",
             "status" => "ok",
             "post_id" => $post_id,
+            "user_id" => intval($result['user_id']),
             "author" => API::get_id_username(intval($result['user_id'])),
             "comment_count" => $comment_num,
             "title" => htmlspecialchars($result['title']),
@@ -208,7 +209,6 @@ class POST{
         $json = array(
             "method" => "get_recent_posts",
             "status" => "ok",
-            "count" => $numrows,
             "pages" => $pages,
             "pagenow" => $page,
             "posts" => $posts
@@ -291,7 +291,6 @@ class POST{
         $json = array(
             "method" => "get_search_posts",
             "status" => "ok",
-            "count" => $numrows,
             "pages" => $pages,
             "pagenow" => $page,
             "posts" => $posts
@@ -376,7 +375,6 @@ class POST{
         $json = array(
             "method" => "get_tag_posts",
             "status" => "ok",
-            "count" => $numrows,
             "pages" => $pages,
             "pagenow" => $page,
             "posts" => $posts
@@ -445,7 +443,6 @@ class POST{
         $json = array(
             "method" => "get_user_posts",
             "status" => "ok",
-            "count" => $numrows,
             "pages" => $pages,
             "pagenow" => $page,
             "posts" => $posts

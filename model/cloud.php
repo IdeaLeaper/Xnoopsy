@@ -11,18 +11,15 @@ class CLOUD{
         
         $base64_string = trim($_IS['base']);
         $base64_result = substr($base64_string, strpos($base64_string,",")+1);
-        
-        $decode_image = base64_decode($base64_result);
-        $file = "./tmp/".time().".jpg";
-        file_put_contents($file, $decode_image);
-        
-        $fi = new finfo(FILEINFO_MIME_TYPE); 
-        $mime_type = $fi->file($file); 
-        if($mime_type!="image/jpeg"){
-            unlink($file);
+		
+        if(strpos($base64_string, "image/jpeg")===false){
             echo '{"method":"upload_image","status":"error","error":"type"}';
             return;
         }
+		
+        $decode_image = base64_decode($base64_result);
+        $file = "./tmp/".time().".jpg";
+        file_put_contents($file, $decode_image);
         
         $path = "@".realpath($file); //要上传的文件  
         $fields = array(
